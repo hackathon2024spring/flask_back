@@ -1,0 +1,22 @@
+{
+  "name": "fastapi_chat",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "fastapi",
+  "workspaceFolder": "/home/appuser/devcon",
+  "shutdownAction": "stopCompose",
+  "remoteUser": "appuser",
+  "updateRemoteUserUID": true,
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "mikoz.black-py",
+        "mhutchie.git-graph"
+      ]
+    }
+  }
+}

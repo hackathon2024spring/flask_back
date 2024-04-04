@@ -1,0 +1,6 @@
+.env
+*.pyc
+*.mako
+README
+alembic/versions
+alembic.ini
