@@ -1,8 +1,31 @@
+# 運動アプリ用コード
+
+class GetExcercise:
+    endpoint = "/excercise"
+    summary = "実施できる運動の取得"
+    description = """実施できる運動の取得"""
+
+class GetExcercise_setting:
+    endpoint = "/excercise_setting"
+    summary = "登録されている運動の取得"
+    description = """登録されている運動の取得"""
+
+class AddExcercise:
+    endpoint = "/excercise"
+    summary = "実施した運動の変更"
+    description = """実施した運動の変更"""
+
+class AddExcercise_setting:
+    endpoint = "/excercise_setting"
+    summary = "登録されている運動の変更"
+    description = """登録されている運動の登録変更"""
+
+# ログイン機能用コード
+
 class Signup:
     endpoint = "/signup"
     summary = "ユーザー登録"
     description = """ユーザーを登録します。"""
-
 
 class Login:
     endpoint = "/login"
@@ -15,6 +38,8 @@ class Signout:
     summary = "サインアウト"
     description = """サインアウト"""
 
+
+# 以下はTODOアプリ用コード
 
 class AddChannel:
     endpoint = "/channel"
