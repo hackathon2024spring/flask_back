@@ -8,7 +8,7 @@ from apis.bases.exercise import Exercise
 class ExerciseDone(Base):
     __tablename__ = "exercise_done"  # テーブル名 __tablename__はsqlalchemyの特別な変数
     user_id = Column(String(255), ForeignKey(User.uid), nullable=False)
-    excercise_id = Column(
+    exercise_id = Column(
         Integer(unsigned=True),
         ForeignKey(Exercise.id, ondelete="CASCADE"),
         nullable=False
@@ -16,6 +16,6 @@ class ExerciseDone(Base):
     date = Column(Date, nullable=False)
     # 複合主キー設定。既存テーブルの再定義を認める。
     __table_args__ = (
-        PrimaryKeyConstraint(user_id, excercise_id, date),
+        PrimaryKeyConstraint(user_id, exercise_id, date),
         {"extend_existing": True}
     )

@@ -12,6 +12,11 @@ class Model(BaseModel):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             )
+        
+        # exercise_selectedテーブルから、該当するuser_idのデータを全て削除する。
+        # exercise_selectedテーブルに、postされたexecise_idを登録する。
+        # レスポンスを返す。
+
 
         # Channelテーブルに挿入するクエリ作成
         query = Message.__table__.insert().values(

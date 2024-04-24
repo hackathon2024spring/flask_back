@@ -1,22 +1,22 @@
 # 運動アプリ用コード
 
-class GetExcercise:
-    endpoint = "/excercise"
+class GetExercise:
+    endpoint = "/exercise/{date}"
     summary = "実施できる運動の取得"
     description = """実施できる運動の取得"""
 
-class GetExcercise_setting:
-    endpoint = "/excercise_setting"
+class GetExercise_setting:
+    endpoint = "/exercise_setting"
     summary = "登録されている運動の取得"
     description = """登録されている運動の取得"""
 
-class AddExcercise:
-    endpoint = "/excercise"
+class AddExercise:
+    endpoint = "/exercise"
     summary = "実施した運動の変更"
     description = """実施した運動の変更"""
 
-class AddExcercise_setting:
-    endpoint = "/excercise_setting"
+class AddExercise_setting:
+    endpoint = "/exercise_setting"
     summary = "登録されている運動の変更"
     description = """登録されている運動の登録変更"""
 
