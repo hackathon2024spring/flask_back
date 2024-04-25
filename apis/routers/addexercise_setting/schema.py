@@ -1,17 +1,17 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 
 class TokenData(BaseModel):
     data: str = Field(..., title="デコードされたtoken", description="cookieから取得したtoken一式")
 
+class RequestData(BaseModel):
+    exerciseId: int = Field(..., title="Exercise_id", description="選択した運動のid")
 
 class Request(BaseModel):
-    cid: int = Field(..., title="掲示板id", description="掲示板やチャットルームのid")
-    message: str = Field(..., title="書き込み", description="掲示板やチャットルームの書き込み")
-
-
-RequestExample = {"cid": 1, "message": "誰かかまってください、、"}
+    data: Optional[List[RequestData]] = Field(None, title="選択した運動idのリスト", description="選択した運動idのリスト")
+    
+RequestExample = [{"exerciseId": 1}, {"exerciseId": 2}]
 
 
 class Data(BaseModel):
