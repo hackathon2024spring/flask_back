@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import delete, insert
-from .schema import Request, Response, TokenData, Data
+from .schema import Request, Response, TokenData
 from apis.services.authfunctions import database
 from apis.bases.exercise_selected import ExerciseSelected
 
@@ -19,14 +19,17 @@ class Model(BaseModel):
         delete_query = delete(ExerciseSelected).where(ExerciseSelected.user_id == token.uid,)
         await database.execute(delete_query)
 
-        # exercise_selectedテーブルに、postされたexecise_idを登録する。for?
-        query = insert(ExerciseSelected).values(
-            user_id=token.uid,
-            exercise_id=body.cid,
-        )
-        # テーブル更新
+        # exercise_selectedテーブルに、postされたexecise_idを登録する。
+        # user_idとpostされたexecise_idのそれぞれの辞書を作り、それをリストにまとめる=data_insert
+        data_insert = [{"user_id": token.uid, "exercise_id": item.exerciseId} for item in body.selected]
+
+        # data_insertリストをexercise_selectedテーブルにinsertするqueryを作成する
+        query = insert(ExerciseSelected).values(data_insert)
+        # テーブルを更新する
         await database.execute(query)
+        
         # レスポンスを返す。
+        return Response(status=1)
 
 
         # # Channelテーブルに挿入するクエリ作成
