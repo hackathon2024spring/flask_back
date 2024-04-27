@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from databases import Database
 from apis.bases.user import User
 from pydantic import BaseModel
-
+from typing import Optional  # 追加
 import os
 
 user = os.getenv("MYSQL_USER")
@@ -55,7 +55,7 @@ def verify_password(password, db_password):
 
 
 # JWTを生成
-def create_access_token(data: dict, expires_delta: timedelta or None = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
 
     # expire_deltaが指定されていなければ15分に設定
