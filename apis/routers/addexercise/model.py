@@ -13,22 +13,27 @@ class Model(BaseModel):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             )
-        
+
         # exercise_doneテーブルから、該当するuser_id,dateのデータを全て削除する。
         delete_query = delete(ExerciseDone).where(
             ExerciseDone.user_id == token.uid, ExerciseDone.date == date
             )
-        await database.execute(delete_query)
 
         # exercise_doneテーブルに、postされたexecise_id,dateを登録する。
         # user_idとpostされたexecise_id,dateの組それぞれの辞書を作り、それをリストにまとめる=data_insert
-        data_insert = [{"user_id": token.uid, "exercise_id": item.exerciseId, "date": date}
+        data_insert = [{"user_id": token.uid, "exercise_id": item.exerciseId, "date": date} 
                        for item in body.done]
 
         # data_insertリストをexercise_doneテーブルにinsertするqueryを作成する
-        query = insert(ExerciseDone).values(data_insert)
-        # テーブルを更新する
-        await database.execute(query)
-        
-        # レスポンスを返す。
-        return Response(status=1)
+        insert_query = insert(ExerciseDone).values(data_insert)
+
+        try:
+            async with database.transaction():
+                await database.execute(query=delete_query)
+                await database.execute(query=insert_query)
+            return Response(status=1)
+        except Exception:
+            # エラーが発生した場合の処理
+            return Response(status=2)
+
+
