@@ -1,13 +1,14 @@
 from fastapi import Depends, APIRouter, status
+from datetime import date
 from apis.services.authfunctions import get_current_user
 from .schema import Request, RequestExample, Response, ResponseExamples, TokenData
 from .model import Model
-from ..endpoints import DelChannel as ep
+from ..endpoints import AddExercise as ep
 
 router = APIRouter()
 
 
-@router.delete(
+@router.post(
     ep.endpoint,
     summary=ep.summary,
     description=ep.description,
@@ -18,7 +19,7 @@ router = APIRouter()
     response_model_exclude_none=True,
 )
 async def get_payloads(
-    body: Request = RequestExample, token: TokenData = Depends(get_current_user)
+    date: date, body: Request = RequestExample, token: TokenData = Depends(get_current_user)
 ):
-    res = await Model().exec(body, token)
+    res = await Model().exec(date, body, token)
     return res
