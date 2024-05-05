@@ -9,8 +9,21 @@ from .routers.getexercise import view as view4
 from .routers.getexercise_setting import view as view5
 from .routers.addexercise import view as view6
 from .routers.addexercise_setting import view as view7
+import os
 
-app = FastAPI(docs_url="/docs", redoc_url="/redoc")
+is_with_proxy = os.getenv("VITE_REACT_APP_IS_WITH_PROXY")
+if is_with_proxy == "True":
+    # コンテナ単体の.envでは宣言せず、ルートの.envだけで宣言すると正しく読み込まれる。
+    app = FastAPI(
+        root_path="/fastapi",
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
+    )
+else:
+    app = FastAPI(docs_url="/docs", redoc_url="/redoc", openapi_url="/openapi.json")
+
+# app = FastAPI(docs_url="/docs", redoc_url="/redoc")
 
 # AWSなどにデプロイしURLのドメインが確定したら指定する。
 # ブラウザからのリクエストはdockerコンテナのサービス名に基づくURLを名前解決できない。
