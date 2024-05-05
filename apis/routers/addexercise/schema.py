@@ -1,22 +1,18 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
+from datetime import date
 
 
 class TokenData(BaseModel):
     data: str = Field(..., title="デコードされたtoken", description="cookieから取得したtoken一式")
 
+class RequestData(BaseModel):
+    exerciseId: int = Field(..., title="Exercise_id", description="運動のid")
 
 class Request(BaseModel):
-    id: int = Field(..., title="掲示板id", description="掲示板やチャットルームのid")
-
-
-RequestExample = {"id": 1}
-
-
-class Data(BaseModel):
-    id: int = Field(..., title="掲示板id", description="掲示板やチャットルームのid")
-    name: str = Field(..., title="掲示板の名前", description="掲示板やチャットルームの名前")
-
+    done: Optional[List[RequestData]] = Field(None, title="実施した運動idのリスト", description="実施した運動idのリスト")
+    
+RequestExample = {"done": [{"exerciseId": 1}, {"exerciseId": 2}]}
 
 class Response(BaseModel):
     status: int = Field(
@@ -24,7 +20,7 @@ class Response(BaseModel):
         title="ステータス",
         description="正しい場合1、不正の場合0",
     )
-    data: Optional[Data] = Field(None, title="削除した掲示板", description="掲示板id、掲示板の名前")
+    
 
 
 ResponseExamples = {
@@ -37,10 +33,6 @@ ResponseExamples = {
                         "summary": "成功",
                         "value": {
                             "status": 1,
-                            "data": {
-                                "id": 1,
-                                "name": "ぼっち部屋",
-                            },
                         },
                     },
                     "error": {"summary": "エラーケース1", "value": {"status": 0}},
