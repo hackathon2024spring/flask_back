@@ -5,10 +5,10 @@ from apis.services.authfunctions import database
 from .routers.signup import view as view1
 from .routers.login import view as view2
 from .routers.signout import view as view3
-from .routers.getexercise import view as view4
-from .routers.getexercise_setting import view as view5
-from .routers.addexercise import view as view6
-from .routers.addexercise_setting import view as view7
+from .routers.getexercises import view as view4
+from .routers.getexercises_setting import view as view5
+from .routers.addexercises import view as view6
+from .routers.addexercises_setting import view as view7
 import os
 
 is_with_proxy = os.getenv("VITE_REACT_APP_IS_WITH_PROXY")
