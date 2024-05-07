@@ -6,7 +6,7 @@ from apis.bases.exercise import Exercise
 
 
 class ExerciseDone(Base):
-    __tablename__ = "exercise_done"  # テーブル名 __tablename__はsqlalchemyの特別な変数
+    __tablename__ = "exercises_done"  # テーブル名 __tablename__はsqlalchemyの特別な変数
     user_id = Column(String(255), ForeignKey(User.uid), nullable=False)
     exercise_id = Column(
         Integer(unsigned=True),

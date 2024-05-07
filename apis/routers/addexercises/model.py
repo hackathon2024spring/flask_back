@@ -35,5 +35,3 @@ class Model(BaseModel):
         except Exception:
             # エラーが発生した場合の処理
             return Response(status=2)
-
-

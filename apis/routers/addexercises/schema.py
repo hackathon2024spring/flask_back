@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from datetime import date
+
 
 
 class TokenData(BaseModel):
@@ -11,7 +11,7 @@ class RequestData(BaseModel):
 
 class Request(BaseModel):
     done: Optional[List[RequestData]] = Field(None, title="実施した運動idのリスト", description="実施した運動idのリスト")
-    
+
 RequestExample = {"done": [{"exerciseId": 1}, {"exerciseId": 2}]}
 class Response(BaseModel):
     status: int = Field(
@@ -19,7 +19,7 @@ class Response(BaseModel):
         title="ステータス",
         description="正しい場合1、不正の場合0",
     )
-    
+
 
 
 ResponseExamples = {
