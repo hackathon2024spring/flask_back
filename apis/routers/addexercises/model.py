@@ -1,6 +1,6 @@
 from fastapi import status, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import delete, insert
+from sqlalchemy.dialects.mysql import insert
 from .schema import Request, Response, TokenData
 from apis.services.authfunctions import database
 from apis.bases.exercise_done import ExerciseDone
@@ -14,30 +14,18 @@ class Model(BaseModel):
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
             )
         
-        # exercise_doneテーブルから、該当するuser_id,dateのデータを全て削除する。
-        delete_query = delete(ExerciseDone).where(
-            ExerciseDone.user_id == token.uid, ExerciseDone.date == date
-            )
-
-        # exercise_doneテーブルに、postされたexecise_id,dateを登録する。
-        # user_idとpostされたexecise_id,dateの組それぞれの辞書を作り、それをリストにまとめる=data_insert
-        data_insert = [{"user_id": token.uid, "exercise_id": item.exerciseId, "date": date} 
-                       for item in body.done]
-
+        # exercise_doneテーブルに、postされたdate,execise_id,doneを登録する。
+        # user_idとpostされたexecise_id,date,doneの組それぞれの辞書を作り、それをリストにまとめる=data_insert 
+        data_insert = [{"user_id": token.uid, "exercise_id": item.exerciseId, "date": date, "done": item.done} 
+                       for item in body.data]
+        
         # data_insertリストをexercise_doneテーブルにinsertするqueryを作成する
-        insert_query = insert(ExerciseDone).values(data_insert)
-               
-        try:
-            async with database.transaction():
-                # 処理1: DELETE操作
-                await database.execute(query=delete_query)
+        insert_stmt = insert(ExerciseDone).values(data_insert)
+        # すでに同じプライマリーキーのレコードがある場合、doneのみをupdateする
+        on_duplicate_key_stmt = insert_stmt.on_duplicate_key_update(
+            done=insert_stmt.inserted.done
+        )
+        # UPSERT操作
+        await database.execute(query=on_duplicate_key_stmt)
 
-                # # (テスト用)エラーを発生させる
-                # raise Exception("わざとエラーを発生させる")
-            
-                # 処理2: INSERT操作
-                await database.execute(query=insert_query)
-            return Response(status=1)
-        except Exception:
-            # エラーが発生した場合の処理
-            return Response(status=2)
+        return Response(status=1)
