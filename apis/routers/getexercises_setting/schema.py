@@ -32,7 +32,7 @@ ResponseExamples = {
                         "summary": "クエリリクエスト成功",
                         "value": {
                             "status": 1,
-                            "results": [
+                            "data": [
                                 {
                                     "exerciseId": 1,
                                     "exerciseName": "階段を使う",
@@ -48,7 +48,7 @@ ResponseExamples = {
                     },
                     "error": {
                         "summary": "クエリリクエスト失敗",
-                        "value": {"status": 0, "results": []},
+                        "value": {"status": 0, "data": []},
                     },
                 }
             }

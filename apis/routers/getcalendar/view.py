@@ -19,6 +19,6 @@ router = APIRouter()
     response_model_exclude_unset=True,
     response_model_exclude_none=True,
 )
-async def get_payloads(date: date, token: TokenData = Depends(get_current_user)):
-    res = await Model().exec(date, token)
+async def get_payloads(year: int, month: int, token: TokenData = Depends(get_current_user)):
+    res = await Model().exec(year, month, token)
     return res

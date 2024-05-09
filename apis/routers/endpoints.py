@@ -11,7 +11,7 @@ class GetExercises_setting:
     description = """登録されている運動の取得"""
 
 class AddExercises:
-    endpoint = "/exercises"
+    endpoint = "/exercises/{date}"
     summary = "実施した運動の変更"
     description = """実施した運動の変更"""
 
@@ -19,6 +19,16 @@ class AddExercises_setting:
     endpoint = "/exercises_setting"
     summary = "登録されている運動の変更"
     description = """登録されている運動の登録変更"""
+
+class GetUser:
+    endpoint = "/user"
+    summary = "ユーザー情報の取得"
+    description = """ユーザー情報の取得"""
+
+class GetCalendar:
+    endpoint = "/calendar/{year}/{month}"
+    summary = "カレンダーの表示情報を取得"
+    description = """カレンダーの表示情報を取得"""
 
 # ログイン機能用コード
 

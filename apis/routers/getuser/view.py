@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, status
-from datetime import date
 from apis.services.authfunctions import get_current_user
 from .schema import Response, ResponseExamples, TokenData
 from .model import Model
-from ..endpoints import GetExercises as ep
+from ..endpoints import GetUser as ep
 
 router = APIRouter()
 
@@ -19,6 +18,6 @@ router = APIRouter()
     response_model_exclude_unset=True,
     response_model_exclude_none=True,
 )
-async def get_payloads(date: date, token: TokenData = Depends(get_current_user)):
-    res = await Model().exec(date, token)
+async def get_payloads(token: TokenData = Depends(get_current_user)):
+    res = await Model().exec(token)
     return res

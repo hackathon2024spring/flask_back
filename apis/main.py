@@ -9,6 +9,7 @@ from .routers.getexercises import view as view4
 from .routers.getexercises_setting import view as view5
 from .routers.addexercises import view as view6
 from .routers.addexercises_setting import view as view7
+from .routers.getuser import view as view8
 import os
 
 is_with_proxy = os.getenv("VITE_REACT_APP_IS_WITH_PROXY")
@@ -57,5 +58,5 @@ async def shutdown_logic():
 
 app.router.lifespan_context = app_lifespan
 
-for v in [view1, view2, view3, view4, view5, view6, view7]:
+for v in [view1, view2, view3, view4, view5, view6, view7, view8]:
     app.include_router(v.router)
