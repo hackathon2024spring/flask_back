@@ -9,7 +9,7 @@ class TokenData(BaseModel):
 class Data(BaseModel):    
     exerciseId: int = Field(..., title="exercise_id", description="運動のid")
     exerciseName: str = Field(..., title="exercise_name", description="運動の名前")
-    exerciseSelected: bool = Field(..., title="exercise_selected", description="運動の選択の有無")
+    exerciseDone: bool = Field(..., title="exercise_done", description="運動の実施の有無")
 
 class Response(BaseModel):
     status: int = Field(
@@ -18,7 +18,7 @@ class Response(BaseModel):
         description="正しい場合1、不正の場合0",
     )
     data: Optional[List[Data]] = Field(
-        None, title="実施できる運動設定の編集画面", description="運動項目、選択の有無"
+        None, title="1日の運動の編集画面", description="運動項目、実施の有無"
     )
 
 
@@ -32,23 +32,23 @@ ResponseExamples = {
                         "summary": "クエリリクエスト成功",
                         "value": {
                             "status": 1,
-                            "results": [
+                            "data": [
                                 {
                                     "exerciseId": 1,
                                     "exerciseName": "階段を使う",
-                                    "exerciseSelected": True,
+                                    "exerciseDone": True,
                                 },
                                 {
                                     "exerciseId": 5,
                                     "exerciseName": "一駅分歩く",
-                                    "exerciseSelected": False,
+                                    "exerciseDone": False,
                                 },
                             ],
                         },
                     },
                     "error": {
                         "summary": "クエリリクエスト失敗",
-                        "value": {"status": 0, "results": []},
+                        "value": {"status": 0, "data": []},
                     },
                 }
             }

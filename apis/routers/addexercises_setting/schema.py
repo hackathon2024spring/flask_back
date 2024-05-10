@@ -7,11 +7,12 @@ class TokenData(BaseModel):
 
 class RequestData(BaseModel):
     exerciseId: int = Field(..., title="Exercise_id", description="運動のid")
+    selected: bool = Field(..., title="selected", description="選択したかどうか")
 
 class Request(BaseModel):
-    selected: Optional[List[RequestData]] = Field(None, title="選択した運動idのリスト", description="選択した運動idのリスト")
+    data: Optional[List[RequestData]] = Field(None, title="選択したかどうかの運動のリスト", description="選択したかどうかの運動のリスト")
     
-RequestExample = {"selected": [{"exerciseId": 1}, {"exerciseId": 2}]}
+RequestExample = {"data": [{"exerciseId": 1, "selected": True}, {"exerciseId": 2, "selected": True}]}
 
 
 class Response(BaseModel):

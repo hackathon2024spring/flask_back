@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from datetime import date
 
 
 class TokenData(BaseModel):
@@ -8,11 +7,12 @@ class TokenData(BaseModel):
 
 class RequestData(BaseModel):
     exerciseId: int = Field(..., title="Exercise_id", description="運動のid")
+    done: bool = Field(..., title="done", description="運動の実施の有無")
 
 class Request(BaseModel):
-    done: Optional[List[RequestData]] = Field(None, title="実施した運動idのリスト", description="実施した運動idのリスト")
+    data: Optional[List[RequestData]] = Field(None, title="運動を実施したかどうかのリスト", description="運動を実施したかどうかのリスト")
     
-RequestExample = {"done": [{"exerciseId": 1}, {"exerciseId": 2}]}
+RequestExample = {"data": [{"exerciseId": 1, "done":True}, {"exerciseId": 2, "done":True}]}
 
 class Response(BaseModel):
     status: int = Field(
