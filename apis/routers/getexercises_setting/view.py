@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from apis.services.authfunctions import get_current_user
 from .schema import Response, ResponseExamples, TokenData
 from .model import Model
-from ..endpoints import GetExercise_setting as ep
+from ..endpoints import GetExercises_setting as ep
 
 router = APIRouter()
 

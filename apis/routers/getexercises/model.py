@@ -20,12 +20,19 @@ class Model(BaseModel):
         query = select(Exercise).order_by(Exercise.id)
         res_exe = await database.fetch_all(query)
 
-        # exercise_doneから該当するuser_id,dateのexercise_idを全てselectする→res_done
-        query = select(ExerciseDone.exercise_id).where(ExerciseDone.user_id == token.uid, ExerciseDone.date == date)
+        # exercise_doneから、該当するuser_id,dateかつdone=trueであるexercise_idを全てselectする→res_done
+        query = select(ExerciseDone.exercise_id).where(
+            ExerciseDone.user_id == token.uid,
+            ExerciseDone.date == date,
+            ExerciseDone.done == True
+            )
         res_done = await database.fetch_all(query)
 
-        # exercise_selectedから該当するuser_idのexercise_idを全てselectする→res_selected
-        query = select(ExerciseSelected.exercise_id).where(ExerciseSelected.user_id == token.uid,)
+        # exercise_selectedから、該当するuser_idかつselected=trueであるexercise_idを全てselectする→res_selected
+        query = select(ExerciseSelected.exercise_id).where(
+            ExerciseSelected.user_id == token.uid,
+            ExerciseSelected.selected == True
+            )
         res_selected = await database.fetch_all(query)
 
         # res_done,res_selectedそれぞれから、exercise_idのみのリストを作る。

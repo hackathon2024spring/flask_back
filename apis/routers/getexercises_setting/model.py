@@ -18,8 +18,11 @@ class Model(BaseModel):
         query = select(Exercise).order_by(Exercise.id)
         res_exe = await database.fetch_all(query)
 
-        # exercise_selectedから該当するuser_idのexercise_idを全てselectする→res_selected
-        query = select(ExerciseSelected.exercise_id).where(ExerciseSelected.user_id == token.uid,)
+        # exercise_selectedから該当するuser_idかつselected=trueであるexercise_idを全てselectする→res_selected
+        query = select(ExerciseSelected.exercise_id).where(
+            ExerciseSelected.user_id == token.uid,
+            ExerciseSelected.selected == True
+            )
         res_selected = await database.fetch_all(query)
 
         # res_selectedからexercise_idのみのリストを作る。
@@ -29,13 +32,13 @@ class Model(BaseModel):
         arry = []
         for exe in res_exe:
             # idがselected_listに含まれているかを判定
-            done = exe.id in selected_list
+            selected = exe.id in selected_list
             
             # Dataを作ってarryに追加。
             dt = Data(
                 exerciseId = exe.id,
                 exerciseName = exe.exercise_name,
-                exerciseSelected = done,
+                exerciseSelected = selected,
             )
             arry.append(dt)
 

@@ -3,7 +3,7 @@ from datetime import date
 from apis.services.authfunctions import get_current_user
 from .schema import Request, RequestExample, Response, ResponseExamples, TokenData
 from .model import Model
-from ..endpoints import AddExercise as ep
+from ..endpoints import AddExercises as ep
 
 router = APIRouter()
 
