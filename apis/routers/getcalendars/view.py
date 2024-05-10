@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, status
-from datetime import date
 from apis.services.authfunctions import get_current_user
 from .schema import Response, ResponseExamples, TokenData
 from .model import Model
-from ..endpoints import GetExercises as ep
+from ..endpoints import GetCalendars as ep
 
 router = APIRouter()
 

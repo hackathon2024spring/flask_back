@@ -17,12 +17,6 @@ class Model(BaseModel):
         query = select(User).where(User.uid == token.uid)
         res = await database.fetch_one(query)
 
-        # Dataを作る。
-        dt = Data(
-            username = res.username,
-            email = res.email
-        )
-
         # Responseを返す。
-        return Response(status=1, data=dt)
+        return Response(status=1, data=Data(username = res.username, email = res.email))
 

@@ -25,8 +25,8 @@ class GetUser:
     summary = "ユーザー情報の取得"
     description = """ユーザー情報の取得"""
 
-class GetCalendar:
-    endpoint = "/calendar/{year}/{month}"
+class GetCalendars:
+    endpoint = "/calendars/{year}/{month}"
     summary = "カレンダーの表示情報を取得"
     description = """カレンダーの表示情報を取得"""
 
