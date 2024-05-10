@@ -15,7 +15,7 @@ print(f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}")
 # INSERTクエリを実行
 with engine.connect() as con:
     sql_query = """
-        INSERT INTO `exercise`(`id`, `exercise_name`) 
+        INSERT INTO `exercises`(`id`, `exercise_name`) 
         VALUES ('1','階段を使う'),('2','散歩する'),('3','ストレッチをする'), 
                ('4','足踏み運動をする'),('5','一駅分歩く'),('6','ラジオ体操をする');
     """
