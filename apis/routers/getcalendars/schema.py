@@ -1,14 +1,14 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from datetime import date
 
 
 class TokenData(BaseModel):
     data: str = Field(..., title="デコードされたtoken", description="cookieから取得したtoken一式")
 
-
+# 日付の変数名をdateにすると型付のdateがPylanceで認識されないため、わざとdayへ変更
 class Data(BaseModel):    
-    exerciseId: int = Field(..., title="exercise_id", description="運動のid")
-    exerciseName: str = Field(..., title="exercise_name", description="運動の名前")
+    day: date = Field(..., title="日付", description="日付")
     exerciseDone: bool = Field(..., title="exercise_done", description="運動の実施の有無")
 
 class Response(BaseModel):
@@ -18,7 +18,7 @@ class Response(BaseModel):
         description="正しい場合1、不正の場合0",
     )
     data: Optional[List[Data]] = Field(
-        None, title="1日の運動の編集画面", description="運動項目、実施の有無"
+        None, title="1ヶ月の運動実施日", description="日付、実施の有無"
     )
 
 
@@ -34,13 +34,11 @@ ResponseExamples = {
                             "status": 1,
                             "data": [
                                 {
-                                    "exerciseId": 1,
-                                    "exerciseName": "階段を使う",
+                                    "day": "2024-04-01",
                                     "exerciseDone": True,
                                 },
                                 {
-                                    "exerciseId": 5,
-                                    "exerciseName": "一駅分歩く",
+                                    "day": "2024-04-02",
                                     "exerciseDone": False,
                                 },
                             ],
