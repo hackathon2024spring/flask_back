@@ -1,5 +1,5 @@
 {
-  "name": "fastapi_chat",
+  "name": "fastapi_choco",
   "dockerComposeFile": "../docker-compose.yml",
   "service": "fastapi",
   "workspaceFolder": "/home/appuser/devcon",
@@ -14,8 +14,9 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "mikoz.black-py",
-        "mhutchie.git-graph"
+        "mhutchie.git-graph",
+        "ms-python.black-formatter",
+        "ritwickdey.LiveServer"
       ]
     }
   }
