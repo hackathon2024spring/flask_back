@@ -32,6 +32,8 @@ COPY requirements.txt /app/
 RUN pip install --upgrade pip && pip install --upgrade setuptools && pip install python-dotenv
 RUN pip install -r requirements.txt
 
+ENV PATH="/home/appuser/devcon/apis:${PATH}"
+
 # localhostでid $whoamiを実行しuidとgidの数値を事前に確認し.envファイルに転機すること。
 # localhostのユーザーと同一のuid・gidのユーザーを作成。
 # localhostとコンテナ内が同一ユーザー扱いとなりGitの監視が混乱しない。

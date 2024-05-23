@@ -1,5 +1,7 @@
 #!/bin/bash
 source ./.env
+# start uvicorn server
+export PYTHONPATH=/home/appuser/devcon/apis:$PYTHONPATH
 
 while :; do
     echo "Checking if MySQL is up on port ${PORT_MYSQL_FAST}"
@@ -14,11 +16,12 @@ done
 sleep 5
 
 #remove previous alembic configuration.
-if [ -d "alembic" ]; then
-    rm -rf alembic
-    rm alembic.ini
+if [ -d "./apis/alembic" ]; then
+    rm -rf ./apis/alembic
+    rm ./apis/alembic.ini
 fi
 
+cd apis
 # renew alembic configuration
 alembic init alembic
 # Set DATABASE_URL
@@ -26,7 +29,7 @@ DATABASE_URL="mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${MYSQL_HOST_FAST}
 # Replace sqlalchemy.url in alembic.ini
 sed -i "s|sqlalchemy.url = .*|sqlalchemy.url = ${DATABASE_URL}|" /home/appuser/devcon/alembic.ini
 # exchange ./alembic/env.py already updated.
-cp ./env.py ./alembic/env.py
+cp ../env.py ./alembic/env.py
 
 # migration
 alembic revision --autogenerate -m "migration by build.sh"
@@ -35,10 +38,7 @@ chown -R appuser:appgroup alembic
 chown appuser:appgroup alembic.ini
 python insert_db.py
 
-# start uvicorn server
-export PYTHONPATH=/home/appuser/devcon/server:$PYTHONPATH
-uvicorn apis.main:app --reload --host 0.0.0.0 --port ${PORT_FAST} --log-level info
-
+uvicorn main:app --reload --host 0.0.0.0 --port ${PORT_FAST} --log-level info
 #--log-levelはproductionでは不要
 
 # tail -f /dev/null
