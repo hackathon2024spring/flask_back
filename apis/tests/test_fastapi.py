@@ -2,7 +2,7 @@ import pytest
 from fastapi import FastAPI, status
 from httpx import AsyncClient, ASGITransport, Cookies
 from ddd.router.hello import view as view0
-from ddd.router.signup import view as view1
+from ddd.router.register import view as view1
 from ddd.router.login import view as view2
 from ddd.router.logout import view as view3
 from ddd.router.getuser import view as view4
@@ -36,7 +36,7 @@ async def test_hello():
 
 
 @pytest.mark.asyncio
-async def test_signup_illegal_email():
+async def test_register_illegal_email():
     """
     Test:   ユーザーの新規登録でemailが無い
     Expect: 不適切なemailで失敗したレスポンスが帰ること。
@@ -44,7 +44,7 @@ async def test_signup_illegal_email():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/signup",
+            "/register",
             json={
                 "username": "testuser",
                 "email": "",
@@ -58,7 +58,7 @@ async def test_signup_illegal_email():
 
 
 @pytest.mark.asyncio
-async def test_signup_illegal_username():
+async def test_register_illegal_username():
     """
     Test:   ユーザーの新規登録でusernameが無い
     Expect: ユーザー登録が失敗したレスポンスが帰ること。
@@ -66,7 +66,7 @@ async def test_signup_illegal_username():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/signup",
+            "/register",
             json={
                 "username": "",
                 "email": "test@example.com",
@@ -80,7 +80,7 @@ async def test_signup_illegal_username():
 
 
 @pytest.mark.asyncio
-async def test_signup_short_password():
+async def test_register_short_password():
     """
     Test:   ユーザーの新規登録でパスワードが短すぎる
     Expect: ユーザー登録が失敗したレスポンスが帰ること。
@@ -88,7 +88,7 @@ async def test_signup_short_password():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/signup",
+            "/register",
             json={
                 "username": "testuser",
                 "email": "test@example.com",
@@ -102,7 +102,7 @@ async def test_signup_short_password():
 
 
 @pytest.mark.asyncio
-async def test_signup_wrong_password():
+async def test_register_wrong_password():
     """
     Test:   ユーザーの新規登録でconfrim_passwordが不一致
     Expect: ユーザー登録が失敗したレスポンスが帰ること。
@@ -110,7 +110,7 @@ async def test_signup_wrong_password():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/signup",
+            "/register",
             json={
                 "username": "testuser",
                 "email": "test@example.com",
@@ -124,7 +124,7 @@ async def test_signup_wrong_password():
 
 
 @pytest.mark.asyncio
-async def test_signup_success():
+async def test_register_success():
     """
     Test:   ユーザーの新規登録
     Expect: ユーザー登録が成功したレスポンスが返ること。
@@ -132,7 +132,7 @@ async def test_signup_success():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/signup",
+            "/register",
             json={
                 "username": "testuser",
                 "email": "test@example.com",
@@ -146,7 +146,7 @@ async def test_signup_success():
 
 
 @pytest.mark.asyncio
-async def test_signup_again():
+async def test_register_again():
     """
     Test:   同じユーザーの登録
     Expect: ユーザー登録が失敗したレスポンスが帰ること。
@@ -154,7 +154,7 @@ async def test_signup_again():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         response = await client.post(
-            "/signup",
+            "/register",
             json={
                 "username": "testuser",
                 "email": "test@example.com",
@@ -419,7 +419,7 @@ async def test_logout_success():
         client.cookies = cookies
 
         # /logout にアクセス
-        logout_response = await client.get("/signout")
+        logout_response = await client.get("/logout")
         data = logout_response.json()
         assert logout_response.status_code == status.HTTP_200_OK
         assert data["message"] == "Successfully logged out"

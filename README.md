@@ -18,11 +18,11 @@
 │ │ │ ├── model.py
 │ │ │ ├── schema.py
 │ │ │ └── view.py
-│ │ ├── signout
+│ │ ├── logout
 │ │ │ ├── model.py
 │ │ │ ├── schema.py
 │ │ │ └── view.py
-│ │ └── signup
+│ │ └── register
 │ │ ├── model.py
 │ │ ├── schema.py
 │ │ └── view.py

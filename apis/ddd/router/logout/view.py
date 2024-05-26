@@ -14,7 +14,7 @@ oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="token")
 
 
 @router.get(
-    "/signout",
+    "/logout",
     summary="ログアウト",
     description="""ログアウト""",
     responses=ResponseExamples,

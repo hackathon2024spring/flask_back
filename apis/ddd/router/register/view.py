@@ -4,7 +4,7 @@ from ddd.domain.value_object import Password, UserName
 from ddd.domain.entity import User as DomainUser
 from ddd.domain.repository import UserRepository
 from ddd.usecase.usecase import UseCase
-from ddd.router.signup.schema import (
+from ddd.router.register.schema import (
     Request,
     RequestExample,
     Response,
@@ -20,13 +20,13 @@ router = APIRouter()
 # Domain User(DDDでエラーチェックなど)→
 # ORM User(sqlAlchemyのORM.Baseを継承する)
 @router.post(
-    "/signup",
+    "/register",
     summary="ユーザー登録",
     description="ユーザーを登録します。",
     response_model=Response,
     responses=ResponseExamples,
 )
-async def signup(
+async def register(
     request: Request = RequestExample,
     user_repository: UserRepository = Depends(get_user_repository),
 ):
