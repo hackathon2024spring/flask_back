@@ -24,9 +24,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 720
 
 
 class UseCase:
-    def __init__(self, userRepository: UserRepository):
+    # loginはtokenが発生していない状態でusecaseにアクセスするので、Optionalにしている。
+    def __init__(self, userRepository: UserRepository, token: Optional[str] = None):
         self.userRepository = userRepository
         self.userService = UserService(userRepository=userRepository)
+        self.token = token
 
     async def get_exercises_in_calendar(self, token: str, calendar: CalendarRequest):
         # uidが返ってこない=既にJWTErrorが発生している。
@@ -174,10 +176,10 @@ class UseCase:
         return json_response
 
     # cookie削除
-    async def remove_cookie(self, token: str):
+    async def remove_cookie(self):
 
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = self.get_user_id(token=self.token)
 
         # login_userが返ってこない=既にHttpExceptionが発生している
         login_user = await self.userRepository.get_user_by_uid(uid=uid)

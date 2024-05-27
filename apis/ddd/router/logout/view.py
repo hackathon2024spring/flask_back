@@ -20,9 +20,9 @@ async def logout(
     token: str = Depends(oauth2_scheme),
     user_repository: UserRepository = Depends(get_user_repository),
 ):
-    usecase = UseCase(userRepository=user_repository)
+    usecase = UseCase(userRepository=user_repository, token=token)
 
     # userService.get_authorized_idでHttpExceptionが設定されている。
     # cookieの無いresponse=cookieが外れる
-    response = await usecase.remove_cookie(token=token)
+    response = await usecase.remove_cookie()
     return response
