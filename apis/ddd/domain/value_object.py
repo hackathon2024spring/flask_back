@@ -1,4 +1,5 @@
 import uuid
+from uuid import uuid4
 from pydantic import BaseModel, Field, field_validator
 import re
 import hashlib
@@ -71,3 +72,16 @@ class UserId(BaseModel):
 
     def id(self):
         return self.a_uid
+
+
+class SessionID:
+    def __init__(self, value: str = None):
+        self.value = value or str(uuid4())
+
+    def __str__(self):
+        return self.value
+
+    def __eq__(self, other):
+        if isinstance(other, SessionID):
+            return self.value == other.value
+        return False

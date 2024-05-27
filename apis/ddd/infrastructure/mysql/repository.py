@@ -18,6 +18,19 @@ from pydantic import EmailStr
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from ddd.domain.value_object import UserName
+from ddd.domain.entity import (
+    CalendarRequest,
+    CalendarResponse,
+    RegisteredUser,
+    User as DomainUser,
+    Exercise as DomainExercise,
+    ExerciseSelectedRequest as DomainExerciseSelectedRequest,
+    ExerciseSelectedResponse as DomainExerciseSelectedResponse,
+    ExerciseDoneRequest as DomainExerciseDoneRequest,
+    ExerciseDoneResponse as DomainExerciseDoneResponse,
+)
+from ddd.domain.repository import UserRepository
 from ddd.infrastructure.orms.base import Base
 from ddd.infrastructure.orms.user import User as OrmUser
 from ddd.infrastructure.orms.exercise import Exercise as OrmExercise
@@ -25,19 +38,6 @@ from ddd.infrastructure.orms.exercise_selected import (
     ExerciseSelected as OrmExerciseSelected,
 )
 from ddd.infrastructure.orms.exercise_done import ExerciseDone as OrmExerciseDone
-from ddd.domain.value_object import UserName
-from ddd.domain.entity import (
-    CalendarRequest,
-    CalendarResponse,
-    RegisteredUser,
-    User as DomainUser,
-    ExerciseSelectedRequest as DomainExerciseSelectedRequest,
-    ExerciseSelectedResponse as DomainExerciseSelectedResponse,
-    Exercise as DomainExercise,
-    ExerciseDoneRequest as DomainExerciseDoneRequest,
-    ExerciseDoneResponse as DomainExerciseDoneResponse,
-)
-from ddd.domain.repository import UserRepository
 
 
 class UserRepositoryImpl(UserRepository):
