@@ -8,7 +8,6 @@ from ddd.router.getcalendars.schema import Data, Response, ResponseExamples
 
 
 router = APIRouter()
-oauth2_scheme = Token(tokenUrl="token")
 
 
 @router.get(
@@ -21,15 +20,15 @@ oauth2_scheme = Token(tokenUrl="token")
 async def get_calendars(
     year: int,
     month: int,
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(Token(tokenUrl="token")),
     user_repository: UserRepository = Depends(get_user_repository),
 ):
-    usecase = UseCase(userRepository=user_repository)
+    usecase = UseCase(userRepository=user_repository, token=token)
 
     calendar_request = CalendarRequest(a_year=year, a_month=month)
 
     exercises_in_calendar = await usecase.get_exercises_in_calendar(
-        token=token, calendar=calendar_request
+        calendar=calendar_request
     )
 
     # DDDの世界から取り出すための変換

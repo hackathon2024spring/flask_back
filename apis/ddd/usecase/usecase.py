@@ -30,9 +30,9 @@ class UseCase:
         self.userService = UserService(userRepository=userRepository)
         self.token = token
 
-    async def get_exercises_in_calendar(self, token: str, calendar: CalendarRequest):
+    async def get_exercises_in_calendar(self, calendar: CalendarRequest):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = self.get_user_id(token=self.token)
 
         # 現在のexercisesで更新しつつ、uidのexercises_doneを抽出
         exercises_calendar = (
@@ -44,9 +44,9 @@ class UseCase:
         return exercises_calendar
 
     # dateに実施したexercisesを取得
-    async def get_user_exercises_done(self, token: str, date: date):
+    async def get_user_exercises_done(self, date: date):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = self.get_user_id(token=self.token)
 
         # 現在のexercisesで更新しつつ、uidのexercises_doneを抽出
         exercises_done = (
@@ -56,10 +56,10 @@ class UseCase:
         return exercises_done
 
     async def update_user_exercises_done(
-        self, token: str, date: date, exercises_done: list[DomainExerciseDone]
+        self, date: date, exercises_done: list[DomainExerciseDone]
     ):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = self.get_user_id(token=self.token)
 
         # uid・date・ExerciseDoneを組み合わせる
         exercises_done_request = [
@@ -83,10 +83,10 @@ class UseCase:
             )
 
     # 登録中の実施候補のexercisesを取得
-    async def get_user_exercises_selected(self, token: str):
+    async def get_user_exercises_selected(self):
 
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = self.get_user_id(token=self.token)
 
         # 現在のexercisesで更新しつつ、uidのexercises_selectedを抽出
         exercises_selected = (
@@ -97,10 +97,10 @@ class UseCase:
 
     # 実施候補のexercisesを登録、更新
     async def update_user_exercises_selected(
-        self, token: str, exercises_selected: List[DomainExerciseSelected]
+        self, exercises_selected: List[DomainExerciseSelected]
     ):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = self.get_user_id(token=self.token)
         exercises_selected_request = [
             DomainExerciseSelectedRequest(
                 a_id=exe.id(), a_user_id=uid, a_selected=exe.selected()
@@ -206,9 +206,9 @@ class UseCase:
             return json_response
 
     # cookieからログイン中のユーザーを取得
-    async def get_login_user(self, token: str):
+    async def get_login_user(self):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = self.get_user_id(token=self.token)
 
         # login_userが返ってこない=既にHttpExceptionが発生している
         login_user: OrmUser = await self.userRepository.get_user_by_uid(uid=uid)

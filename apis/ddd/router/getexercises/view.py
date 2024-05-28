@@ -10,7 +10,6 @@ from ddd.router.getexercises.schema import Response, ResponseExamples, Data
 
 
 router = APIRouter()
-oauth2_scheme = Token(tokenUrl="token")
 
 
 @router.get(
@@ -22,14 +21,14 @@ oauth2_scheme = Token(tokenUrl="token")
 )
 async def get_exercises(
     date: date,
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(Token(tokenUrl="token")),
     user_repository: UserRepository = Depends(get_user_repository),
 ):
 
-    usecase = UseCase(userRepository=user_repository)
+    usecase = UseCase(userRepository=user_repository, token=token)
 
     user_exercises_done: List[ExerciseDoneResponse] = (
-        await usecase.get_user_exercises_done(token=token, date=date)
+        await usecase.get_user_exercises_done(date=date)
     )
 
     # DDDの世界から取り出すための変換

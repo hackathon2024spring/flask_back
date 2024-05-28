@@ -13,7 +13,6 @@ from ddd.router.addexercises.schema import (
 )
 
 router = APIRouter()
-oauth2_scheme = Token(tokenUrl="token")
 
 
 @router.post(
@@ -25,7 +24,7 @@ oauth2_scheme = Token(tokenUrl="token")
 )
 async def add_exercises(
     date: date,
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(Token(tokenUrl="token")),
     request: Request = RequestExample,
     user_repository: UserRepository = Depends(get_user_repository),
 ):
@@ -33,7 +32,7 @@ async def add_exercises(
     if not request.data:
         raise HTTPException(status_code=400, detail="No data provided")
 
-    usecase = UseCase(userRepository=user_repository)
+    usecase = UseCase(userRepository=user_repository, token=token)
 
     # DDDの世界で扱うエンティティに変換
     exercises_done = [
@@ -42,8 +41,6 @@ async def add_exercises(
     ]
 
     # tokenとexercise_doneでExerciseDoneテーブルをupsert
-    await usecase.update_user_exercises_done(
-        token=token, date=date, exercises_done=exercises_done
-    )
+    await usecase.update_user_exercises_done(date=date, exercises_done=exercises_done)
 
     return Response(status=1)

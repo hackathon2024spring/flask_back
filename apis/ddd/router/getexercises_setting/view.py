@@ -20,12 +20,12 @@ oauth2_scheme = Token(tokenUrl="token")
     responses=ResponseExamples,
 )
 async def get_user_exercises_setting(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(Token(tokenUrl="token")),
     user_repository: UserRepository = Depends(get_user_repository),
 ):
-    usecase = UseCase(userRepository=user_repository)
+    usecase = UseCase(userRepository=user_repository, token=token)
     user_exercise_selected: List[ExerciseSelectedResponse] = (
-        await usecase.get_user_exercises_selected(token=token)
+        await usecase.get_user_exercises_selected()
     )
 
     # DDDの世界から取り出すための変換
