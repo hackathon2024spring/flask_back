@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from ddd.router.signup import view as view1
+from ddd.router.register import view as view1
 from ddd.router.login import view as view2
 from ddd.router.logout import view as view3
 from ddd.router.getuser import view as view4

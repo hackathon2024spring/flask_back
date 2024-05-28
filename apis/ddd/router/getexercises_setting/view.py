@@ -1,16 +1,15 @@
 from typing import List
 from fastapi import APIRouter, Depends
-from ddd.usecase.usecase import UseCase
-from ddd.infrastructure.repository_provider import get_user_repository
 from ddd.domain.entity import ExerciseSelectedResponse
+from ddd.domain.entity_oauth2 import OAuth2PasswordBearerWithCookie as Token
 from ddd.domain.repository import UserRepository
+from ddd.infrastructure.repository_provider import get_user_repository
+from ddd.usecase.usecase import UseCase
 from ddd.router.getexercises_setting.schema import Response, Data, ResponseExamples
-from ddd.usecase.oauth2 import (
-    OAuth2PasswordBearerWithCookie,
-)
+
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="token")
+oauth2_scheme = Token(tokenUrl="token")
 
 
 @router.get(
@@ -21,12 +20,12 @@ oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="token")
     responses=ResponseExamples,
 )
 async def get_user_exercises_setting(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(Token(tokenUrl="token")),
     user_repository: UserRepository = Depends(get_user_repository),
 ):
-    usecase = UseCase(userRepository=user_repository)
+    usecase = UseCase(userRepository=user_repository, token=token)
     user_exercise_selected: List[ExerciseSelectedResponse] = (
-        await usecase.get_user_exercises_selected(token=token)
+        await usecase.get_user_exercises_selected()
     )
 
     # DDDの世界から取り出すための変換

@@ -1,14 +1,15 @@
 import os
+import secrets
 from typing import List, Optional
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from jose import jwt, JWTError
 from pydantic import EmailStr
 from datetime import date, datetime, timedelta, timezone
+from ddd.infrastructure.orms.user import User as OrmUser
 from ddd.domain.value_object import Password
 from ddd.domain.repository import UserRepository
 from ddd.domain.domain_service import UserService
-from ddd.infrastructure.orms.user import User as OrmUser
 from ddd.domain.entity import (
     CalendarRequest,
     User as DomainUser,
@@ -17,6 +18,7 @@ from ddd.domain.entity import (
     ExerciseDone as DomainExerciseDone,
     ExerciseDoneRequest as DomainExerciseDoneRequest,
 )
+from ddd.infrastructure.redis.repository import RedisRipository
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
@@ -24,13 +26,16 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 720
 
 
 class UseCase:
-    def __init__(self, userRepository: UserRepository):
+    # loginはtokenが発生していない状態でusecaseにアクセスするので、Optionalにしている。
+    def __init__(self, userRepository: UserRepository, token: Optional[str] = None):
         self.userRepository = userRepository
+        self.redisRepository = RedisRipository()
         self.userService = UserService(userRepository=userRepository)
+        self.token = token
 
-    async def get_exercises_in_calendar(self, token: str, calendar: CalendarRequest):
+    async def get_exercises_in_calendar(self, calendar: CalendarRequest):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = await self.get_user_id()
 
         # 現在のexercisesで更新しつつ、uidのexercises_doneを抽出
         exercises_calendar = (
@@ -42,9 +47,9 @@ class UseCase:
         return exercises_calendar
 
     # dateに実施したexercisesを取得
-    async def get_user_exercises_done(self, token: str, date: date):
+    async def get_user_exercises_done(self, date: date):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = await self.get_user_id()
 
         # 現在のexercisesで更新しつつ、uidのexercises_doneを抽出
         exercises_done = (
@@ -54,10 +59,10 @@ class UseCase:
         return exercises_done
 
     async def update_user_exercises_done(
-        self, token: str, date: date, exercises_done: list[DomainExerciseDone]
+        self, date: date, exercises_done: list[DomainExerciseDone]
     ):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = await self.get_user_id()
 
         # uid・date・ExerciseDoneを組み合わせる
         exercises_done_request = [
@@ -81,10 +86,10 @@ class UseCase:
             )
 
     # 登録中の実施候補のexercisesを取得
-    async def get_user_exercises_selected(self, token: str):
+    async def get_user_exercises_selected(self):
 
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = await self.get_user_id()
 
         # 現在のexercisesで更新しつつ、uidのexercises_selectedを抽出
         exercises_selected = (
@@ -95,10 +100,11 @@ class UseCase:
 
     # 実施候補のexercisesを登録、更新
     async def update_user_exercises_selected(
-        self, token: str, exercises_selected: List[DomainExerciseSelected]
+        self, exercises_selected: List[DomainExerciseSelected]
     ):
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = await self.get_user_id()
+
         exercises_selected_request = [
             DomainExerciseSelectedRequest(
                 a_id=exe.id(), a_user_id=uid, a_selected=exe.selected()
@@ -158,8 +164,19 @@ class UseCase:
             expires_delta=access_token_expires,
         )
 
+        csrf_token = secrets.token_urlsafe(32)
+        await self.redisRepository.set(
+            key=authorized_id, value=csrf_token, expire=access_token_expires
+        )
+
         # cookieをサーバーから操作するresponse生成
         json_response = JSONResponse(content={"token_type": "bearer"})
+
+        is_https = os.getenv("IS_HTTPS")
+        if is_https == "True":
+            mode = True
+        else:
+            mode = False
 
         # cookieに必要な情報を付与
         json_response.set_cookie(
@@ -167,21 +184,39 @@ class UseCase:
             value=access_token,
             httponly=True,
             samesite="Strict",
-            secure=False,  # 本番環境ではHTTPSが前提のためTrueに設定
+            secure=mode,  # 本番環境ではHTTPSが前提のためTrue。それ以外はFalse
             # domain=".local.dev",
+        )
+
+        json_response.set_cookie(
+            key="session_id",
+            value=csrf_token,
+            httponly=True,
+            samesite="Strict",
+            secure=mode,  # 本番環境ではHTTPSが前提のためTrue。それ以外はFalse
         )
 
         return json_response
 
     # cookie削除
-    async def remove_cookie(self, token: str):
+    async def remove_cookie(self):
+
+        # jwtとcsrf_tokenを取得
+        jw_token, csrf_token = self.token.values()
 
         # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
+        uid = await self.get_user_id()
 
         # login_userが返ってこない=既にHttpExceptionが発生している
         login_user = await self.userRepository.get_user_by_uid(uid=uid)
-        if login_user:
+
+        # store_tokenが返ってこない=既にHttpExceptionが発生している。
+        store_token = await self.get_csrf_token(uid=uid)
+
+        # jw_tokenに紐ついたuserとcsrf_tokenが一致
+        if login_user and (csrf_token == store_token):
+            #
+            await self.redisRepository.delete(key=uid)
             # cookieをサーバーから操作するresponse生成
             json_response = JSONResponse(
                 content={
@@ -200,17 +235,18 @@ class UseCase:
                 max_age=0,
                 # domain=".local.dev",
             )
+            json_response.set_cookie(
+                key="session_id",
+                value="",
+                httponly=False,
+                samesite="Strict",
+                secure=False,  # 本番環境ではHTTPSが前提のためTrueに設定
+                max_age=0,
+                # domain=".local.dev",
+            )
+
             # cookieのないresponseを返す。
             return json_response
-
-    # cookieからログイン中のユーザーを取得
-    async def get_login_user(self, token: str):
-        # uidが返ってこない=既にJWTErrorが発生している。
-        uid = self.get_user_id(token=token)
-
-        # login_userが返ってこない=既にHttpExceptionが発生している
-        login_user: OrmUser = await self.userRepository.get_user_by_uid(uid=uid)
-        return login_user
 
     # JWTでcookie生成
     def create_access_token(
@@ -231,15 +267,54 @@ class UseCase:
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
         return encoded_jwt
 
-    # cookieからuidを抽出する。
-    def get_user_id(self, token: str) -> str:
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            uid: str = payload.get("sub")
-            return uid
+    # cookieのjwtとcsrf_tokenを判定し、uidを抽出する。
+    async def get_user_id(self) -> str:
 
-        except JWTError:
+        # tokenがある場合のみ
+        if self.token != None:
+
+            # 格納しているtokenをjwtとcsrftokenに分ける
+            jw_token, csrf_token = self.token.values()
+
+            try:
+                # jwtを解読
+                payload = jwt.decode(jw_token, SECRET_KEY, algorithms=[ALGORITHM])
+                uid: str = payload.get("sub")
+
+                # store_tokenが返ってこない=既にHttpExceptionが発生している。
+                store_token = await self.get_csrf_token(uid=uid)
+
+                # csrf_tokenが一致しない=cookieに不正あり
+                if csrf_token != store_token:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="不適切なcookieです。",
+                    )
+
+                return uid
+
+            except JWTError:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="不適切なcookieです。",
+                )
+
+    # uidとセットとなっているsession_idをredisから取得
+    async def get_csrf_token(self, uid: str) -> str:
+        csrf_token = await self.redisRepository.get(key=uid)
+
+        if csrf_token is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="不適切なcookieです。",
             )
+        return csrf_token
+
+    # cookieからログイン中のユーザーを取得
+    async def get_login_user(self):
+        # uidが返ってこない=既にJWTErrorが発生している。
+        uid = await self.get_user_id()
+
+        # login_userが返ってこない=既にHttpExceptionが発生している
+        login_user: OrmUser = await self.userRepository.get_user_by_uid(uid=uid)
+        return login_user

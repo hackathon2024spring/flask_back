@@ -19,6 +19,14 @@ services:
     #   - ${PORT_FAST}
     command: ["/bin/sh", "-c", "/home/appuser/devcon/build.sh"]
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - hackathon_spring_network
+    ports:
+      - ${PORT_REDIS}:${PORT_REDIS}
+
   mysql_fast:
     build:
       context: ./mysql

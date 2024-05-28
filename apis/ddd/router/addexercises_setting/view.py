@@ -1,20 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
+from ddd.domain.entity import ExerciseSelected as DomainExerciseSelected
+from ddd.domain.entity_oauth2 import OAuth2PasswordBearerWithCookie as Token
+from ddd.domain.repository import UserRepository
+from ddd.infrastructure.repository_provider import get_user_repository
+from ddd.usecase.usecase import UseCase
 from ddd.router.addexercises_setting.schema import (
     Request,
     RequestExample,
     Response,
     ResponseExamples,
 )
-from ddd.usecase.usecase import UseCase
-from ddd.infrastructure.repository_provider import get_user_repository
-from ddd.domain.entity import ExerciseSelected as DomainExerciseSelected
-from ddd.domain.repository import UserRepository
-from ddd.usecase.oauth2 import (
-    OAuth2PasswordBearerWithCookie,
-)
+
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="token")
 
 
 @router.post(
@@ -25,7 +23,7 @@ oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="token")
     responses=ResponseExamples,
 )
 async def add_exercises_setting(
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(Token(tokenUrl="token")),
     request: Request = RequestExample,
     user_repository: UserRepository = Depends(get_user_repository),
 ):
@@ -33,7 +31,7 @@ async def add_exercises_setting(
     if not request.data:
         raise HTTPException(status_code=400, detail="No data provided")
 
-    usecase = UseCase(userRepository=user_repository)
+    usecase = UseCase(userRepository=user_repository, token=token)
 
     # DDDの世界で扱うエンティティに変換
     exercises_selected = [
@@ -42,8 +40,6 @@ async def add_exercises_setting(
     ]
 
     # tokenとexercise_selectedでExercises_settingテーブルをupsert
-    await usecase.update_user_exercises_selected(
-        token=token, exercises_selected=exercises_selected
-    )
+    await usecase.update_user_exercises_selected(exercises_selected=exercises_selected)
 
     return Response(status=1)
