@@ -26,34 +26,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
-    async def __call__(self, request: Request) -> Optional[str]:
-        authorization: str = request.cookies.get("access_token")
-        if not authorization:
-            if self.auto_error:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Not authenticated: No token found",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            else:
-                return None
-        authorization = "Bearer " + authorization
-        print(authorization)
-        scheme, jwt = get_authorization_scheme_param(authorization)
-        if scheme.lower() != "bearer":
-            if self.auto_error:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Not authenticated: Incorrect token format",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            else:
-                return None
-        return jwt
-
-    # # JWT+CSRFtokenの場合
     # async def __call__(self, request: Request) -> Optional[str]:
-    #     # Access Token
     #     authorization: str = request.cookies.get("access_token")
     #     if not authorization:
     #         if self.auto_error:
@@ -65,7 +38,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
     #         else:
     #             return None
     #     authorization = "Bearer " + authorization
-
+    #     print(authorization)
     #     scheme, jwt = get_authorization_scheme_param(authorization)
     #     if scheme.lower() != "bearer":
     #         if self.auto_error:
@@ -76,27 +49,54 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
     #             )
     #         else:
     #             return None
+    #     return jwt
 
-    #     # CSRF Token
-    #     csrf_token: str = request.cookies.get("csrf_token")
-    #     if not csrf_token:
-    #         if self.auto_error:
-    #             raise HTTPException(
-    #                 status_code=status.HTTP_401_UNAUTHORIZED,
-    #                 detail="Not authenticated: No CSRF token found",
-    #                 headers={"WWW-Authenticate": "Bearer"},
-    #             )
-    #         else:
-    #             return None
+    # JWT+CSRFtokenの場合
+    async def __call__(self, request: Request) -> Optional[str]:
+        # Access Token
+        authorization: str = request.cookies.get("access_token")
+        if not authorization:
+            if self.auto_error:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not authenticated: No token found",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                return None
+        authorization = "Bearer " + authorization
 
-    #     if csrf_token.lower() != "csrf":
-    #         if self.auto_error:
-    #             raise HTTPException(
-    #                 status_code=status.HTTP_401_UNAUTHORIZED,
-    #                 detail="Not authenticated: Incorrect CSRF token format",
-    #                 headers={"WWW-Authenticate": "Bearer"},
-    #             )
-    #         else:
-    #             return None
+        scheme, jwt = get_authorization_scheme_param(authorization)
+        if scheme.lower() != "bearer":
+            if self.auto_error:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not authenticated: Incorrect token format",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                return None
 
-    #     return {"access_token": jwt, "csrf_token": csrf_token}
+        # CSRF Token session_idというkeyでcookieに保存する
+        csrf_token: str = request.cookies.get("session_id")
+        if not csrf_token:
+            if self.auto_error:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not authenticated: No CSRF token found",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                return None
+
+        if csrf_token.lower() != "csrf":
+            if self.auto_error:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Not authenticated: Incorrect CSRF token format",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                return None
+
+        return {"access_token": jwt, "session_id": csrf_token}

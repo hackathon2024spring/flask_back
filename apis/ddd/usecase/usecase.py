@@ -1,14 +1,15 @@
 import os
+import secrets
 from typing import List, Optional
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from jose import jwt, JWTError
 from pydantic import EmailStr
 from datetime import date, datetime, timedelta, timezone
+from ddd.infrastructure.orms.user import User as OrmUser
 from ddd.domain.value_object import Password
 from ddd.domain.repository import UserRepository
 from ddd.domain.domain_service import UserService
-from ddd.infrastructure.orms.user import User as OrmUser
 from ddd.domain.entity import (
     CalendarRequest,
     User as DomainUser,
@@ -17,6 +18,7 @@ from ddd.domain.entity import (
     ExerciseDone as DomainExerciseDone,
     ExerciseDoneRequest as DomainExerciseDoneRequest,
 )
+from ddd.infrastructure.redis.repository import RedisRipository
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
@@ -27,6 +29,7 @@ class UseCase:
     # loginはtokenが発生していない状態でusecaseにアクセスするので、Optionalにしている。
     def __init__(self, userRepository: UserRepository, token: Optional[str] = None):
         self.userRepository = userRepository
+        self.redisRepository = RedisRipository()
         self.userService = UserService(userRepository=userRepository)
         self.token = token
 
@@ -160,6 +163,11 @@ class UseCase:
             expires_delta=access_token_expires,
         )
 
+        csrf_token = secrets.token_urlsafe(32)
+        await self.redisRepository.set(
+            key=authorized_id, value=csrf_token, expire=access_token_expires
+        )
+
         # cookieをサーバーから操作するresponse生成
         json_response = JSONResponse(content={"token_type": "bearer"})
 
@@ -171,6 +179,14 @@ class UseCase:
             samesite="Strict",
             secure=False,  # 本番環境ではHTTPSが前提のためTrueに設定
             # domain=".local.dev",
+        )
+
+        json_response.set_cookie(
+            key="session_id",
+            value=csrf_token,
+            httponly=True,
+            samesite="Strict",
+            secure=False,  # 本番環境ではHTTPSが前提のためTrueに設定
         )
 
         return json_response

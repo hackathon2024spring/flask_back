@@ -5,7 +5,7 @@ import os
 class RedisRipository:
     def __init__(self):
         redis_host = os.getenv("REDIS_HOST", "localhost")
-        redis_port = os.getenv("REDIS_PORT", 6379)
+        redis_port = os.getenv("PORT_REDIS", 6379)
         self.redis = aioredis.from_url(f"redis://{redis_host}:{redis_port}")
 
     async def get(self, key: str):
