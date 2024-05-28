@@ -89,14 +89,4 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
             else:
                 return None
 
-        if csrf_token.lower() != "csrf":
-            if self.auto_error:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Not authenticated: Incorrect CSRF token format",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            else:
-                return None
-
         return {"access_token": jwt, "session_id": csrf_token}
