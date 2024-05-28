@@ -172,13 +172,19 @@ class UseCase:
         # cookieをサーバーから操作するresponse生成
         json_response = JSONResponse(content={"token_type": "bearer"})
 
+        is_https = os.getenv("IS_HTTPS")
+        if is_https == "True":
+            mode = True
+        else:
+            mode = False
+
         # cookieに必要な情報を付与
         json_response.set_cookie(
             key="access_token",
             value=access_token,
             httponly=True,
             samesite="Strict",
-            secure=False,  # 本番環境ではHTTPSが前提のためTrueに設定
+            secure=mode,  # 本番環境ではHTTPSが前提のためTrue。それ以外はFalse
             # domain=".local.dev",
         )
 
@@ -187,7 +193,7 @@ class UseCase:
             value=csrf_token,
             httponly=True,
             samesite="Strict",
-            secure=False,  # 本番環境ではHTTPSが前提のためTrueに設定
+            secure=mode,  # 本番環境ではHTTPSが前提のためTrue。それ以外はFalse
         )
 
         return json_response
